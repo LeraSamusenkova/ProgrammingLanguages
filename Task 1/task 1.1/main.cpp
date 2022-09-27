@@ -45,5 +45,5 @@ double get_a(const double x, const double y, const double z)
 
 double get_b(const double x, const double y, const double z)
 {
-	return ((y * x * x - z) / (pow(M_E, z * x) - 1));
+	return ((y * x * x - z) / (exp(z * x) - 1));
 }
