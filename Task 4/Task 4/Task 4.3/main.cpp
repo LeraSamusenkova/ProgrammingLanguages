@@ -15,39 +15,62 @@ enum class fill_array
  };
 
 /*
+*\brief Функция считывает размер массива
+*\param message выводит сообщение для пользователя
+*\return возвращает размеры массива
+*/
+size_t get_size(const string& message);
+
+/*
 *\brief Функция заполняет массив случайными элементами
-*\param line количество строк массива
-*\param column количество столбцов массива
+*\param rows количество строк массива
+*\param columns количество столбцов массива
 *\param min_value минимальное значение генерируемого элемента
 *\param max_value максимальное значение генерируемого элемента
 *\return возвращает указатель на массив заполненный случайными элементами
 */
-int** fill_random_array(const size_t line, const size_t column, const int min_value, const int max_value);
+int** fill_random_array(const size_t rows, const size_t columns, const int min_value, const int max_value);
 
 /*
 *\brief Функция заполняет массив элементами введенными пользователем
-*\param line количество строк массива
-*\param column количество столбцов массива
+*\param rows количество строк массива
+*\param columns количество столбцов массива
 *\return возвращает указатель на массив заполненный пользователем
 */
-int** fill_manual_array(size_t line, size_t column);
+int** fill_manual_array(const size_t rows, const size_t columns);
 
 /*
 *\brief Функция создающая массив 
-*\param line количество строк массива
-*\param column количество столбцов массива
+*\param rows количество строк массива
+*\param columns количество столбцов массива
 *\return возвращает указатель на созданный массив
 */
-int** create_array(size_t line, size_t column);
+int** create_array(const size_t rows, const size_t columns);
 
 /*
 *\brief Функция выводящая массив на экран
 *\param array указатель на массив
-*\param line количество строк массива
-*\param column количество столбцов массива
+*\param rows количество строк массива
+*\param columns количество столбцов массива
 */
-void print_array(int** array, const size_t line, const size_t column);
+void print_array(int** array, const size_t rows, const size_t columns);
 
+/*
+*\brief Функция возвращающая максимальный элемент одномерного массива
+*\param array указатель на массив
+*\param columns количество столбцов массива
+*\return возвращает максимальный элемент
+*/
+int get_max_element(int* array, const size_t columns);
+
+/*
+*\brief Функция для подсчета первого задания
+*\param array исходный массив
+*\param rows количество строк массива
+*\param columns количество столбцов массива
+*\return возвращает указатель на массив для задания 1
+*/
+int** task_1(int** array, const size_t rows, const size_t columns);
 
 /*
 *\brief Точка входа в программу
@@ -56,15 +79,11 @@ void print_array(int** array, const size_t line, const size_t column);
 int main()
 {
 	setlocale(LC_ALL, "Rus");
-	size_t line;
-	size_t column;
+	int rows = get_size("Введите количество строк: \n");
+	int columns = get_size("Введите количество столбцов: \n");;
 	const int min_value = -100;
 	const int max_value = 100;
-	cout << "Введите количество строк: " << endl;
-	cin >> line;
-	cout << "Введите количество столбцов: " << endl;
-	cin >> column;
-	int** array = create_array(line, column);
+	int** array = create_array(rows, columns);
 	
 
 	cout << "Как следует заполнить массив?" << "\n" << static_cast<int>(fill_array::random) << '\t' << "Случайно" << "\n" << static_cast <int>(fill_array::manual) << '\t' << "Пользовательский ввод" << endl;
@@ -74,31 +93,49 @@ int main()
 
 	switch (choice)
 	{
-	case(fill_array::random): 
-	{
-		array = fill_random_array(line, column, min_value, max_value);
-		break;
+		case(fill_array::random): 
+		{
+			array = fill_random_array(rows, columns, min_value, max_value);
+			break;
+		}
+		case(fill_array::manual): 
+		{
+			array = fill_manual_array(rows, columns);
+			break;
+		}
+		default: 
+		{
+			cout << "error" << endl;
+		}
 	}
-	case(fill_array::manual): 
-	{
-		array = fill_manual_array(line, column);
-		break;
-	}
-	default: 
-	{
-		cout << "error" << endl;
-	}
-	}
-	print_array(array, line, column);
+	int** array_task_1 = task_1(array, rows, columns);
+	print_array(array, rows, columns);
+	cout << "________________Заменим максимальный элемент строки на 0________________" << endl;
+	print_array(array_task_1, rows, columns);
+
 	return 0;
 }
 
-int** fill_manual_array( size_t line, size_t column) 
+size_t get_size(const string& message)
 {
-	int** array = create_array(line, column);
-	for (size_t i = 0; i < line; i++) 
+	int size = -1;
+	cout << message;
+	cin >> size;
+
+	if (size < 0)
 	{
-		for (size_t j = 0; j < column; j++) 
+		throw out_of_range("Incorrect size. Value has to be greater or equal zero.");
+	}
+
+	return size;
+}
+
+int** fill_manual_array( const size_t rows,const size_t columns) 
+{
+	int** array = create_array(rows, columns);
+	for (size_t i = 0; i < rows; i++) 
+	{
+		for (size_t j = 0; j < columns; j++) 
 		{
 			int l = 0;
 			cin >> l;
@@ -109,15 +146,15 @@ int** fill_manual_array( size_t line, size_t column)
 }
 
 
-int** fill_random_array(const size_t line, const size_t column, const int min_value, const int max_value)
+int** fill_random_array(const size_t rows, const size_t columns, const int min_value, const int max_value)
 {
-	int** array = create_array(line, column);
+	int** array = create_array(rows, columns);
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_int_distribution<> uniformIntDistribution(min_value, max_value);
-	for (size_t i = 0; i < line; i++)
+	for (size_t i = 0; i < rows; i++)
 	{
-		for (size_t j = 0; j < column; j++) 
+		for (size_t j = 0; j < columns; j++) 
 		{
 			array[i][j] = uniformIntDistribution(gen);
 		}
@@ -126,25 +163,60 @@ int** fill_random_array(const size_t line, const size_t column, const int min_va
 	return array;
 }
 
-int** create_array(size_t line, size_t column) 
+int** create_array( const size_t rows, const size_t columns) 
 {
-	int** array = new int* [line];
+	int** array = new int* [rows];
 
-	for (size_t i = 0; i < line; i++) 
+	for (size_t i = 0; i < rows; i++) 
 	{
-		array[i] = new int[column];
+		array[i] = new int[columns];
 	}
 	return array;
 }
 
-void print_array(int** array, const size_t line, const size_t column) 
+void print_array(int** array, const size_t rows, const size_t columns) 
 {
-	for (size_t i = 0; i < line; i++)
+	for (size_t i = 0; i < rows; i++)
 	{
-		for (size_t j = 0; j < column; j++)
+		for (size_t j = 0; j < columns; j++)
 		{
 			cout << array[i][j] << "\t";
 		}
 		cout << "\n";
 	}
+}
+
+int get_max_element(int* array, const size_t columns)
+{
+	int max = array[0];
+	for (size_t i = 0; i < columns; i++)
+	{
+		if (array[i] > max)
+		{
+			max = array[i];
+		}
+	}
+	return max;
+}
+
+int** task_1(int** array, const size_t rows, const size_t columns)
+{
+	int** array_new = create_array(rows, columns);
+	int max = 0;
+	for (size_t i = 0; i < rows; i++)
+	{
+		max = get_max_element(array[i], columns);
+		for (size_t c = 0; c < columns; c++)
+		{
+			if (array[i][c] == max)
+			{
+				array_new[i][c] = 0;
+			}
+			else
+			{
+				array_new[i][c] = array[i][c];
+			}
+		}
+	}
+	return array_new;
 }
